@@ -67,6 +67,26 @@ app.get('/files/:name', (req, res) => {
     })
 })
 
+
+// edit files here
+app.get('/edit/:name', (req, res) => {
+    fs.readFile(`./files/${req.params.name}`, 'utf-8', (err, fileData) => {
+        console.log(fileData)
+        res.render('edit', { previousName: req.params.name, previousFileData: fileData });
+    })
+})
+
+app.post('/update', (req, res) => {
+    console.log(req.body);
+    fs.writeFile(`./files/${req.body.new_name.split(' ').join('')}`, req.body.new_details, (err) => {
+        console.log(err, 'something went wrong');
+        res.redirect('/')
+        // console.log(data);
+        // res.send(data);
+    })
+})
+
+
 app.use((err, req, res, next) => {
     console.error(err.stack)
     res.status(500).send('Something broke!')

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/stylesheet/style.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <title>Document</title>
+</head>
+
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="font-bold text-2xl mb-6 text-center">Register Here</h1>
+        <form action="/update" method="POST" class="space-y-4">
+            <!-- Name Input -->
+            <div>
+                <label for="name" class="block font-medium text-gray-700">Edit Name</label>
+                <input type="text" id="name" name="new_name" placeholder="New Name" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring
+                focus:ring-indigo-300" value=<%=previousName %>
+                >
+            </div>
+            <!-- Text Area Input -->
+            <label for="name" class="block font-medium text-gray-700">Edit Details</label>
+            <textarea type="text" id="name" name="new_details" placeholder="New text"
+                class="w-full resize-none p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-indigo-300">
+            <%=previousFileData %></textarea>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit" style="background-color:green;"
+                    class="white_text w-full bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 transition">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+    </div>
+</body>
+
+<script src="/script/script.js"></script>
+
+</html>
