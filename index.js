@@ -1,95 +1,86 @@
 import express from 'express';
-import path from 'path'
-import { fileURLToPath } from 'url';
-import fs from 'fs'
+import dotenv from 'dotenv';
+import user from './models/user.js';
 
-// this is called middleware: 
 const app = express();
 
-// if you are using "type":"module" then you need to do this 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Load environment variables from .env file
+dotenv.config();
 
-// for reading json data if we don't put it we not able to read the json data
+// Get the PORT from env or default to 5000
+const PORT = process.env.PORT || 5000;
+
+//😁😁😁😁 Middleware for reading JSON and form data
 app.use(express.json());
-
-// for reading urlencoded data if we don't use it we not able to read www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-// if "type":"common"(by default) then only need to write this line
-app.use(express.static(path.join(__dirname, 'public')));
-
-// npm i ejs and then create a folter (check the name of folder it should be "views" definately);
-app.set('view engine', 'ejs');
-
+//😁😁😁😁 Middleware example
 app.use((req, res, next) => {
-    // console.log('middleware running');
-    next();
+    console.log(`Middleware: ${req.method} ${req.url}`);
+    next(); // Pass control to the next middleware or route
 });
 
+
+//😁😁😁😁 Routes
 app.get('/', (req, res) => {
-    fs.readdir(`./files`, (err, files) => {
-        // console.log(files)
-        // console.log('error occuring while reading file folder')
-        res.render('index', { files: files });
-    })
+    res.send('Route created');
 });
 
-// dynamic routing 
-app.get(`/profile/:name`, (req, res) => {
-    const name = req.params.name;
-    res.send(`i'm ${name}`)
-})
+// Create a user (POST /create)
+app.post("/create-user", async (req, res) => {
+    try {
+        const { name, email } = req.body;
+        const userData = await user.create({ name, email });
+        res.status(201).send({ message: "User created", user: userData });
+    } catch (error) {
+        res.status(400).send({ message: "Error creating user", error: error.message });
+    }
+});
 
-app.get('/sign-up', (req, res, next) => {
-    // res.send('sign-up successfully')
-    return next(new Error('something is wrong'))
-})
+// Read all users (GET /users)
+app.get("/users", async (req, res) => {
+    try {
+        const users = await user.find();
+        res.status(200).send(users);
+    } catch (error) {
+        res.status(500).send({ message: "Error fetching users", error: error.message });
+    }
+});
 
-// route for submit the form
+// Update a user (PUT /update/:id)
+app.put("/update/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, email } = req.body;
+        const updatedUser = await user.findByIdAndUpdate(
+            id,
+            { name, email },
+            { new: true, runValidators: true }
+        );
+        if (!updatedUser) {
+            return res.status(404).send({ message: "User not found" });
+        }
+        res.status(200).send({ message: "User updated", user: updatedUser });
+    } catch (error) {
+        res.status(400).send({ message: "Error updating user", error: error.message });
+    }
+});
 
-app.post('/submit', (req, res) => {
-    // console.log(req.body);
-    const data = fs.writeFile(`./files/${req.body.name.split(' ').join('')}`, req.body.details, (err) => {
-        console.log(err, 'something went wrong');
-        res.redirect('/')
-        // console.log(data);
-        res.send(data);
-    })
-})
+// Delete a user (DELETE /delete/:id)
+app.delete("/delete/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedUser = await user.findByIdAndDelete(id);
+        if (!deletedUser) {
+            return res.status(404).send({ message: "User not found" });
+        }
+        res.status(200).send({ message: "User deleted", user: deletedUser });
+    } catch (error) {
+        res.status(500).send({ message: "Error deleting user", error: error.message });
+    }
+});
 
-app.get('/files/:name', (req, res) => {
-    // console.log(req.body);
-    fs.readFile(`./files/${req.params.name}`, 'utf-8', (err, fileData) => {
-        console.log(err, 'something went wrong');
-        // console.log(fileData)
-        res.render('readfile', { filename: req.params.name, fileData: fileData });
-    })
-})
-
-
-// edit files here
-app.get('/edit/:name', (req, res) => {
-    fs.readFile(`./files/${req.params.name}`, 'utf-8', (err, fileData) => {
-        console.log(fileData)
-        res.render('edit', { previousName: req.params.name, previousFileData: fileData });
-    })
-})
-
-app.post('/update', (req, res) => {
-    console.log(req.body);
-    fs.writeFile(`./files/${req.body.new_name.split(' ').join('')}`, req.body.new_details, (err) => {
-        console.log(err, 'something went wrong');
-        res.redirect('/')
-        // console.log(data);
-        // res.send(data);
-    })
-})
-
-
-app.use((err, req, res, next) => {
-    console.error(err.stack)
-    res.status(500).send('Something broke!')
-})
-
-app.listen(5000);
+//😁😁😁😁😁😁😁😁 Start the server
+app.listen(PORT, () => {
+    console.log(`${PORT} port is running`);
+});
